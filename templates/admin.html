@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Test</title>
+</head>
+<body>
+    <h1>Create Test</h1>
+    <form id="create_test_form">
+        <label for="test_name">Test Name:</label>
+        <input type="text" id="test_name" required><br><br>
+        <label for="start_time">Start Time:</label>
+        <input type="datetime-local" id="start_time" required><br><br>
+        <label for="end_time">End Time:</label>
+        <input type="datetime-local" id="end_time" required><br><br>
+        <button type="submit">Create Test</button>
+    </form>
+
+    <script>
+        // Add event listener to the form submission
+        document.getElementById('create_test_form').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            // Retrieve the JWT token from localStorage
+            const token = localStorage.getItem('jwt_token');  // Get JWT token from localStorage
+
+            if (!token) {
+                alert("No JWT token found. Please log in first.");
+                return;  // Exit the function if no token is found
+            }
+
+            // Get form data
+            const testName = document.getElementById('test_name').value;
+            const startTime = document.getElementById('start_time').value;
+            const endTime = document.getElementById('end_time').value;
+
+            // Send the request to the backend to create the test
+            fetch('/admin/create_test', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`  // Include the JWT token in the Authorization header
+                },
+                body: JSON.stringify({
+                    test_name: testName,
+                    start_time: startTime,
+                    end_time: endTime
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);  // Log the response for debugging
+                if (data.message === 'Test Created') {
+                    alert('Test Created Successfully!');
+                    window.location.href = '/admin';  // Redirect to admin panel after successful creation
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+                alert('An error occurred while creating the test.');
+            });
+        });
+    </script>
+
+<h2>Add Question</h2>
+<form action="{{ url_for('add_question') }}" method="POST">
+    <input type="text" name="test_id" placeholder="Test ID" required><br>
+    <textarea name="question_text" placeholder="Question" required></textarea><br>
+    <input type="text" name="option_a" placeholder="Option A" required><br>
+    <input type="text" name="option_b" placeholder="Option B" required><br>
+    <input type="text" name="option_c" placeholder="Option C" required><br>
+    <input type="text" name="option_d" placeholder="Option D" required><br>
+    <select name="correct_option" required>
+        <option value="A">Option A</option>
+        <option value="B">Option B</option>
+        <option value="C">Option C</option>
+        <option value="D">Option D</option>
+    </select><br>
+    <select name="difficulty" required>
+        <option value="EASY">Easy</option>
+        <option value="MEDIUM">Medium</option>
+        <option value="HARD">Hard</option>
+    </select><br>
+    <button type="submit">Add Question</button>
+</form>
+</body>
+</html>
